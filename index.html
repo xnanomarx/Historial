@@ -83,7 +83,7 @@
     <button class="tab" onclick="showTab('tabla')"><i class="ti ti-trophy"></i> Tabla</button>
     <button class="tab" onclick="showTab('h2h')"><i class="ti ti-arrows-exchange"></i> H2H</button>
     <button class="tab" onclick="showTab('historial')"><i class="ti ti-list"></i> Historial</button>
-    <button class="tab" onclick="showTab('config')"><i class="ti ti-settings"></i> Jugadores</button>
+    <button class="tab" onclick="showTab('config')" style="display:none"><i class="ti ti-settings"></i> Jugadores</button>
   </div>
 
   <!-- CARGAR -->
@@ -176,6 +176,18 @@ const COLORS = ['#3266ad','#d85a30','#1d9e75','#993356'];
 const DEFAULT_PLAYERS = ['Jugador 1','Jugador 2','Jugador 3','Jugador 4'];
 const NUM_PLAYERS = 4;
 
+function formatDate(raw) {
+  if (!raw) return '';
+  const d = new Date(raw);
+  if (isNaN(d)) return raw;
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mo = String(d.getMonth()+1).padStart(2,'0');
+  const yy = d.getFullYear();
+  return hh + ':' + mm + ' ' + dd + '/' + mo + '/' + yy;
+}
+
 function lsGet(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }
 function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 
@@ -199,7 +211,7 @@ async function loadMatches() {
     matches = (data.matches || []).map(m => ({
       p1: parseInt(m.p1), p2: parseInt(m.p2),
       g1: parseInt(m.g1), g2: parseInt(m.g2),
-      date: m.date || '', id: String(m.id || '')
+      date: formatDate(m.date || ""),
     })).filter(m => !isNaN(m.p1) && !isNaN(m.p2));
     setSyncStatus('ok', 'Sincronizado · ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'}));
     renderAll();
