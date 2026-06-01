@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fútbol 5 Amigos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
+  .app { max-width: 700px; margin: 0 auto; padding: 1rem; }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+  .tabs { display: flex; gap: 2px; margin-bottom: 1.25rem; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; }
+  .tab { padding: 8px 14px; font-size: 14px; cursor: pointer; border: none; background: none; color: #666; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 5px; }
+  .tab.active { color: #1a1a1a; border-bottom: 2px solid #1a1a1a; font-weight: 500; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .form-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 12px; color: #888; }
+  select, input[type=number], input[type=text] { height: 38px; padding: 0 10px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; font-size: 14px; }
+  select:focus, input:focus { outline: none; border-color: #999; }
+  .btn { height: 38px; padding: 0 16px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { background: #f5f5f5; }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .btn-primary:hover { background: #333; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-danger { color: #c0392b; border-color: #f5c6c6; }
+  .btn-danger:hover { background: #fdf2f2; }
+  .vs { font-size: 13px; color: #999; align-self: center; padding-top: 18px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1.25rem; }
+  .stat-card { background: #f9f9f9; border-radius: 10px; padding: 12px; }
+  .stat-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 600; color: #1a1a1a; }
+  .stat-name { font-size: 13px; color: #666; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  th { text-align: left; padding: 6px 8px; color: #888; font-weight: 500; border-bottom: 1px solid #eee; }
+  th.num, td.num { text-align: center; }
+  td { padding: 9px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; margin-right: 6px; vertical-align: middle; flex-shrink: 0; }
+  .h2h-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .h2h-card { background: #f9f9f9; border-radius: 10px; padding: 14px; }
+  .h2h-bar-bg { flex: 1; height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; }
+  .h2h-bar { height: 100%; border-radius: 3px; }
+  .empty { color: #aaa; font-size: 14px; text-align: center; padding: 2rem 0; }
+  .match-list { display: flex; flex-direction: column; gap: 6px; }
+  .match-item { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: #f9f9f9; border-radius: 10px; font-size: 13px; }
+  .match-score { font-weight: 600; padding: 0 8px; white-space: nowrap; }
+  .match-date { color: #aaa; font-size: 11px; margin-left: auto; white-space: nowrap; }
+  .match-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100px; }
+  .section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+  .sync-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #888; margin-bottom: 1rem; background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 8px 12px; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; flex-shrink: 0; }
+  .sync-dot.loading { background: #f39c12; animation: pulse 1s infinite; }
+  .sync-dot.error { background: #e74c3c; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .players-setup { display: flex; flex-direction: column; gap: 8px; }
+  .player-row { display: flex; gap: 8px; align-items: center; }
+  .warn { color: #c0392b; font-size: 13px; margin-bottom: 8px; display: none; }
+  @media (max-width: 500px) {
+    .tab { padding: 8px 10px; font-size: 13px; }
+    .match-name { max-width: 70px; }
+    h1 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>⚽ Fútbol 5 Amigos</h1>
+
+  <div class="sync-bar">
+    <div class="sync-dot loading" id="sync-dot"></div>
+    <span id="sync-status">Conectando...</span>
+    <button class="btn" onclick="loadMatches()" style="height:28px;padding:0 10px;font-size:12px;margin-left:auto">
+      <i class="ti ti-refresh"></i> Actualizar
+    </button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('cargar')"><i class="ti ti-ball-football"></i> Cargar</button>
+    <button class="tab" onclick="showTab('tabla')"><i class="ti ti-trophy"></i> Tabla</button>
+    <button class="tab" onclick="showTab('h2h')"><i class="ti ti-arrows-exchange"></i> H2H</button>
+    <button class="tab" onclick="showTab('historial')"><i class="ti ti-list"></i> Historial</button>
+    <button class="tab" onclick="showTab('config')"><i class="ti ti-settings"></i> Jugadores</button>
+  </div>
+
+  <!-- CARGAR -->
+  <div id="tab-cargar" class="section active">
+    <div class="card">
+      <div class="section-title">Registrar resultado</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Jugador 1</label>
+          <select id="p1" onchange="checkSame()"></select>
+        </div>
+        <div class="form-group">
+          <label>Goles</label>
+          <input type="number" id="g1" min="0" max="99" value="0" style="width:64px">
+        </div>
+        <div class="vs">vs</div>
+        <div class="form-group">
+          <label>Goles</label>
+          <input type="number" id="g2" min="0" max="99" value="0" style="width:64px">
+        </div>
+        <div class="form-group">
+          <label>Jugador 2</label>
+          <select id="p2" onchange="checkSame()"></select>
+        </div>
+      </div>
+      <div class="warn" id="same-warn">⚠ Seleccioná jugadores distintos</div>
+      <button class="btn btn-primary" id="btn-add" onclick="addMatch()">
+        <i class="ti ti-plus"></i> Registrar partido
+      </button>
+    </div>
+    <div class="section-title" style="margin-top:1.5rem">Últimos partidos</div>
+    <div id="recent-list" class="match-list"></div>
+  </div>
+
+  <!-- TABLA -->
+  <div id="tab-tabla" class="section">
+    <div class="stat-grid" id="highlights"></div>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th style="width:36%">Jugador</th>
+          <th class="num" style="width:8%">PJ</th>
+          <th class="num" style="width:8%">G</th>
+          <th class="num" style="width:8%">E</th>
+          <th class="num" style="width:8%">P</th>
+          <th class="num" style="width:10%">Goles</th>
+          <th class="num" style="width:9%">Dif</th>
+          <th class="num" style="width:9%">Pts</th>
+        </tr></thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- H2H -->
+  <div id="tab-h2h" class="section">
+    <div class="section-title">Historial cara a cara</div>
+    <div id="h2h-grid" class="h2h-grid"></div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div id="tab-historial" class="section">
+    <div class="form-row" style="margin-bottom:1rem">
+      <div class="form-group">
+        <label>Filtrar por jugador</label>
+        <select id="filter-player" onchange="renderHistorial()">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <button class="btn btn-danger" onclick="clearAll()" style="margin-left:auto">
+        <i class="ti ti-trash"></i> Borrar todo
+      </button>
+    </div>
+    <div id="historial-list" class="match-list"></div>
+  </div>
+
+  <!-- CONFIG -->
+  <div id="tab-config" class="section">
+    <div class="card">
+      <div class="section-title">Nombres de los jugadores</div>
+      <p style="font-size:13px;color:#888;margin-bottom:12px">Cada uno configura los nombres en su dispositivo, una sola vez.</p>
+      <div class="players-setup" id="players-form"></div>
+      <button class="btn btn-primary" onclick="savePlayers()" style="margin-top:1rem">
+        <i class="ti ti-check"></i> Guardar
+      </button>
+    </div>
+    <div class="card" style="margin-top:1rem; border-color:#f5c6c6;">
+      <div class="section-title" style="color:#c0392b">Zona de peligro</div>
+      <p style="font-size:13px;color:#888;margin-bottom:12px">Borra todos los partidos para todos los jugadores.</p>
+      <button class="btn btn-danger" onclick="clearAll()">
+        <i class="ti ti-trash"></i> Borrar todos los partidos
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbyLfivEgPe1j_1R8rm3nQOgdu4zlS2UxjdaTsGUGYokXVf_Z-QZhamn18lJTBZ-KW92/exec';
+const COLORS = ['#3266ad','#d85a30','#1d9e75','#993356','#ba7517'];
+const DEFAULT_PLAYERS = ['Jugador 1','Jugador 2','Jugador 3','Jugador 4','Jugador 5'];
+
+function lsGet(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+
+let players = lsGet('players_futbol', DEFAULT_PLAYERS);
+let matches = [];
+
+function setSyncStatus(state, msg) {
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-status');
+  dot.className = 'sync-dot' + (state === 'ok' ? '' : ' ' + state);
+  txt.textContent = msg;
+}
+
+async function loadMatches() {
+  setSyncStatus('loading', 'Sincronizando...');
+  try {
+    const r = await fetch(API + '?t=' + Date.now());
+    const data = await r.json();
+    matches = (data.matches || []).map(m => ({
+      p1: parseInt(m.p1), p2: parseInt(m.p2),
+      g1: parseInt(m.g1), g2: parseInt(m.g2),
+      date: m.date || '', id: String(m.id || '')
+    })).filter(m => !isNaN(m.p1) && !isNaN(m.p2));
+    setSyncStatus('ok', 'Sincronizado · ' + new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'}));
+    renderAll();
+  } catch(e) {
+    setSyncStatus('error', 'Error de conexión');
+  }
+}
+
+async function addMatch() {
+  const p1 = parseInt(document.getElementById('p1').value);
+  const p2 = parseInt(document.getElementById('p2').value);
+  const g1 = parseInt(document.getElementById('g1').value) || 0;
+  const g2 = parseInt(document.getElementById('g2').value) || 0;
+  if (p1 === p2) return;
+  const btn = document.getElementById('btn-add');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader"></i> Guardando...';
+  setSyncStatus('loading', 'Guardando...');
+  try {
+    const date = new Date().toLocaleDateString('es-AR');
+    const id = Date.now().toString();
+    await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'addMatch', p1, p2, g1, g2, date, id }),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    document.getElementById('g1').value = 0;
+    document.getElementById('g2').value = 0;
+    await loadMatches();
+  } catch(e) {
+    setSyncStatus('error', 'No se pudo guardar');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-plus"></i> Registrar partido';
+}
+
+async function deleteMatch(id) {
+  if (!confirm('¿Borrar este partido?')) return;
+  setSyncStatus('loading', 'Borrando...');
+  try {
+    await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'deleteMatch', id }),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    await loadMatches();
+  } catch(e) {
+    setSyncStatus('error', 'Error al borrar');
+  }
+}
+
+async function clearAll() {
+  if (!confirm('¿Seguro? Esto borra TODOS los partidos para todos.')) return;
+  setSyncStatus('loading', 'Borrando todo...');
+  try {
+    await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'clearAll' }),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    await loadMatches();
+  } catch(e) {
+    setSyncStatus('error', 'Error al borrar');
+  }
+}
+
+function renderPlayerSelects() {
+  ['p1','p2','filter-player'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = (id === 'filter-player' ? '<option value="">Todos</option>' : '') +
+      players.map((p,i) => `<option value="${i}">${p}</option>`).join('');
+    if (cur) el.value = cur;
+  });
+  if (document.getElementById('p2')) document.getElementById('p2').value = '1';
+}
+
+function renderPlayersForm() {
+  document.getElementById('players-form').innerHTML = players.map((p,i) =>
+    `<div class="player-row">
+      <div class="avatar" style="background:${COLORS[i]}22;color:${COLORS[i]}">${p.slice(0,2).toUpperCase()}</div>
+      <input type="text" value="${p}" id="pname-${i}" style="flex:1" maxlength="20">
+    </div>`
+  ).join('');
+}
+
+function savePlayers() {
+  players = Array.from({length:5}, (_,i) => {
+    const v = document.getElementById(`pname-${i}`)?.value.trim();
+    return v || DEFAULT_PLAYERS[i];
+  });
+  lsSet('players_futbol', players);
+  renderPlayerSelects();
+  renderPlayersForm();
+  renderAll();
+  alert('¡Guardado!');
+}
+
+function checkSame() {
+  const same = document.getElementById('p1').value === document.getElementById('p2').value;
+  document.getElementById('same-warn').style.display = same ? 'block' : 'none';
+}
+
+function getStats() {
+  const stats = players.map((_,i) => ({ idx:i, pj:0, g:0, e:0, p:0, gf:0, gc:0 }));
+  matches.forEach(m => {
+    if (m.p1 >= players.length || m.p2 >= players.length) return;
+    const s1 = stats[m.p1], s2 = stats[m.p2];
+    s1.pj++; s2.pj++;
+    s1.gf += m.g1; s1.gc += m.g2;
+    s2.gf += m.g2; s2.gc += m.g1;
+    if (m.g1 > m.g2) { s1.g++; s2.p++; }
+    else if (m.g2 > m.g1) { s2.g++; s1.p++; }
+    else { s1.e++; s2.e++; }
+  });
+  return stats.map(s => ({ ...s, pts: s.g*3+s.e, dif: s.gf-s.gc }));
+}
+
+function renderAll() {
+  renderRecent();
+  renderTabla();
+  renderH2H();
+  renderHistorial();
+}
+
+function renderRecent() {
+  const last = matches.slice(-5).reverse();
+  const el = document.getElementById('recent-list');
+  if (!last.length) { el.innerHTML = '<div class="empty">Aún no hay partidos registrados</div>'; return; }
+  el.innerHTML = last.map(m => `
+    <div class="match-item">
+      <span class="match-name" style="color:${COLORS[m.p1]}">${players[m.p1]||'?'}</span>
+      <span class="match-score">${m.g1} - ${m.g2}</span>
+      <span class="match-name" style="color:${COLORS[m.p2]}">${players[m.p2]||'?'}</span>
+      <span class="match-date">${m.date}</span>
+      <button class="btn btn-danger" onclick="deleteMatch('${m.id}')" style="height:28px;padding:0 8px;font-size:12px;margin-left:4px">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>`).join('');
+}
+
+function renderTabla() {
+  const stats = getStats().sort((a,b) => b.pts-a.pts || b.dif-a.dif || b.gf-a.gf);
+  const hl = document.getElementById('highlights');
+  if (!matches.length) {
+    hl.innerHTML = '';
+    document.getElementById('tabla-body').innerHTML = '<tr><td colspan="8" class="empty">Aún no hay partidos</td></tr>';
+    return;
+  }
+  const topPts  = stats[0];
+  const topGoles = [...stats].sort((a,b) => b.gf-a.gf)[0];
+  const topPJ   = [...stats].sort((a,b) => b.pj-a.pj)[0];
+  hl.innerHTML = `
+    <div class="stat-card"><div class="stat-label">🏆 Más ganador</div><div class="stat-value">${topPts.g}</div><div class="stat-name">${players[topPts.idx]}</div></div>
+    <div class="stat-card"><div class="stat-label">⚽ Más goles</div><div class="stat-value">${topGoles.gf}</div><div class="stat-name">${players[topGoles.idx]}</div></div>
+    <div class="stat-card"><div class="stat-label">📋 Más partidos</div><div class="stat-value">${topPJ.pj}</div><div class="stat-name">${players[topPJ.idx]}</div></div>
+    <div class="stat-card"><div class="stat-label">🎮 Total</div><div class="stat-value">${matches.length}</div><div class="stat-name">partidos</div></div>`;
+  document.getElementById('tabla-body').innerHTML = stats.map((s,rank) => `
+    <tr>
+      <td>
+        <span style="font-size:13px;margin-right:2px">${rank===0?'👑':''}</span>
+        <span class="avatar" style="background:${COLORS[s.idx]}22;color:${COLORS[s.idx]}">${players[s.idx].slice(0,2).toUpperCase()}</span>
+        ${players[s.idx]}
+      </td>
+      <td class="num">${s.pj}</td>
+      <td class="num" style="color:#27ae60">${s.g}</td>
+      <td class="num" style="color:#f39c12">${s.e}</td>
+      <td class="num" style="color:#e74c3c">${s.p}</td>
+      <td class="num">${s.gf}</td>
+      <td class="num" style="color:${s.dif>=0?'#27ae60':'#e74c3c'}">${s.dif>0?'+':''}${s.dif}</td>
+      <td class="num" style="font-weight:600">${s.pts}</td>
+    </tr>`).join('');
+}
+
+function renderH2H() {
+  const el = document.getElementById('h2h-grid');
+  const pairs = [];
+  for (let i=0; i<players.length; i++) for (let j=i+1; j<players.length; j++) {
+    const ms = matches.filter(m => (m.p1===i&&m.p2===j)||(m.p1===j&&m.p2===i));
+    if (!ms.length) continue;
+    let w1=0, w2=0, draws=0, gf1=0, gf2=0;
+    ms.forEach(m => {
+      const [ga,gb] = m.p1===i ? [m.g1,m.g2] : [m.g2,m.g1];
+      gf1+=ga; gf2+=gb;
+      if(ga>gb) w1++; else if(gb>ga) w2++; else draws++;
+    });
+    pairs.push({i,j,w1,w2,draws,gf1,gf2,total:ms.length});
+  }
+  if (!pairs.length) { el.innerHTML = '<div class="empty">Aún no hay partidos</div>'; return; }
+  el.innerHTML = pairs.map(p => {
+    const pct1 = p.total ? Math.round(p.w1/p.total*100) : 0;
+    const pct2 = p.total ? Math.round(p.w2/p.total*100) : 0;
+    return `<div class="h2h-card">
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px">
+        <span style="color:${COLORS[p.i]}">${players[p.i]}</span>
+        <span style="color:#aaa;font-weight:400;font-size:11px">${p.total} PJ</span>
+        <span style="color:${COLORS[p.j]}">${players[p.j]}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px">
+        <span style="color:#27ae60;font-weight:500">${p.w1}G</span>
+        <span style="font-size:14px;font-weight:600">${p.gf1} - ${p.gf2}</span>
+        <span style="color:#27ae60;font-weight:500">${p.w2}G</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:${COLORS[p.i]};min-width:30px">${pct1}%</span>
+        <div class="h2h-bar-bg"><div class="h2h-bar" style="width:${pct1}%;background:${COLORS[p.i]}"></div></div>
+        <div class="h2h-bar-bg"><div class="h2h-bar" style="width:${pct2}%;background:${COLORS[p.j]}"></div></div>
+        <span style="font-size:11px;color:${COLORS[p.j]};min-width:30px;text-align:right">${pct2}%</span>
+      </div>
+      ${p.draws ? `<div style="font-size:11px;color:#aaa;margin-top:6px;text-align:center">${p.draws} empate${p.draws>1?'s':''}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderHistorial() {
+  const filter = document.getElementById('filter-player')?.value;
+  const pidx = filter !== '' ? parseInt(filter) : null;
+  const filtered = pidx === null ? matches : matches.filter(m => m.p1===pidx||m.p2===pidx);
+  const el = document.getElementById('historial-list');
+  if (!filtered.length) { el.innerHTML = '<div class="empty">No hay partidos</div>'; return; }
+  el.innerHTML = [...filtered].reverse().map(m => `
+    <div class="match-item">
+      <span class="match-name" style="color:${COLORS[m.p1]}">${players[m.p1]||'?'}</span>
+      <span class="match-score">${m.g1} - ${m.g2}</span>
+      <span class="match-name" style="color:${COLORS[m.p2]}">${players[m.p2]||'?'}</span>
+      <span class="match-date">${m.date}</span>
+      <button class="btn btn-danger" onclick="deleteMatch('${m.id}')" style="height:28px;padding:0 8px;font-size:12px;margin-left:4px">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>`).join('');
+}
+
+function showTab(name) {
+  const names = ['cargar','tabla','h2h','historial','config'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+renderPlayerSelects();
+renderPlayersForm();
+loadMatches();
+</script>
+</body>
+</html>
