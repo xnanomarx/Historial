@@ -173,7 +173,7 @@
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbyLfivEgPe1j_1R8rm3nQOgdu4zlS2UxjdaTsGUGYokXVf_Z-QZhamn18lJTBZ-KW92/exec';
 const COLORS = ['#3266ad','#d85a30','#1d9e75','#993356'];
-const DEFAULT_PLAYERS = ['Jugador 1','Jugador 2','Jugador 3','Jugador 4'];
+const DEFAULT_PLAYERS = ['Nano','Lucas','Santi','Colo'];
 const NUM_PLAYERS = 4;
 
 function formatDate(raw) {
@@ -191,9 +191,7 @@ function formatDate(raw) {
 function lsGet(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }
 function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 
-let players = lsGet('players_futbol', DEFAULT_PLAYERS);
-if (players.length > NUM_PLAYERS) players = players.slice(0, NUM_PLAYERS);
-if (players.length < NUM_PLAYERS) players = [...players, ...DEFAULT_PLAYERS.slice(players.length)];
+const players = DEFAULT_PLAYERS;
 let matches = [];
 
 function setSyncStatus(state, msg) {
